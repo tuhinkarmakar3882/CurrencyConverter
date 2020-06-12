@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+<body>
+    <h1 class="text-center my-3 display-4">Currency Converter</h1>
+
+    <div class="mx-auto" style="max-width: 350px">
+        <label class="lead mt-3">From:</label>
+        <select class="form-control" class="form-control" id="from"></select>
+
+        <label class="lead mt-3">Amount:</label>
+        <input class="form-control" type="text" id="INR_value">
+
+        <label class="lead mt-3">To:</label>
+        <select class="form-control" id="to"></select>
+    </div>
+
+    <div class="text-center my-4">
+        <button type="button" class="btn btn-dark px-5" onclick="convert()" style="border-radius:50px ">Convert</button>
+    </div>
+
+
+    <div id="conversions" class="container" >
+
+    </div>    
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+
+        window.onload = ()=> {
+
+            $.get(" https://api.exchangeratesapi.io/latest",{base:"INR"})
+            .done((response)=>{
+                let select_from_element = document.getElementById("from");
+                let select_to_element = document.getElementById('to');
+
+                for(let rate in response.rates ){
+
+                   let new_option_element = document.createElement('option');
+
+                   new_option_element.value = rate;
+                   new_option_element.textContent = rate;
+
+                   select_from_element.appendChild(new_option_element);
+
+                   new_option_element_copy = new_option_element.cloneNode(true)
+
+                   select_to_element.appendChild(new_option_element_copy);
+               }
+
+           });
+        }
+
+
+        function convert() {
+            let select_from_value = document.getElementById("from").value;
+            let select_to_value = document.getElementById('to').value;
+            let symbols = select_from_value + ',' + select_to_value;
+            // API CALL
+            $.get(" https://api.exchangeratesapi.io/latest",{base: select_from_value, symbols: symbols})
+            .done((response)=>{
+                let INR_value = document.getElementById("INR_value").value;
+                let conversions_div = document.getElementById('conversions');
+
+                conversions_div.innerHTML = "";
+
+                for(let rate in response.rates ){
+
+                    if(rate !== select_from_value){
+                       let converted_value = INR_value * response.rates[rate];
+
+                       let new_h3_element = document.createElement('h3');
+
+                       new_h3_element.textContent = rate + " : " + converted_value;
+
+                       conversions_div.appendChild(new_h3_element);
+                   }
+               }
+
+           });
+
+        }
+
+    </script>
+
+
+</body>
+</html>
